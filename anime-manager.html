@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدير مجموعة الأنمي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f7f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        
+        .sidebar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .main {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .add-anime {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+        }
+        
+        .input-group button {
+            padding: 10px 16px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .input-group button:hover {
+            background: #0051D5;
+        }
+        
+        .anime-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .anime-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .anime-item:hover {
+            background: #f0f0f0;
+        }
+        
+        .anime-item.active {
+            background: #f0f0f0;
+            border-color: #ddd;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .delete-btn:hover {
+            color: #333;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .section h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .upload-area:hover {
+            border-color: #007AFF;
+            background: #f9f9f9;
+        }
+        
+        .upload-area input {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .files-list {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .file-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            border: 1px solid #eee;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .file-details {
+            flex: 1;
+        }
+        
+        .file-details p {
+            margin: 0;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .file-meta {
+            color: #999;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding-top: 2rem;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 1rem;
+        }
+        
+        .list-header {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 1rem 0 0.5rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مدير مجموعة الأنمي</h1>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="add-anime">
+                <h3>إضافة أنمي جديد</h3>
+                <div class="input-group">
+                    <input type="text" id="animeInput" placeholder="اسم الأنمي">
+                    <button onclick="addAnime()">➕ إضافة</button>
+                </div>
+            </div>
+            
+            <div class="list-header">مجموعتي (<span id="animeCount">0</span>)</div>
+            <div class="anime-list" id="animeList"></div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main" id="mainContent">
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <p>اختر أنمي من الجهة اليسرى أو أضف أنمي جديد</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let animes = [];
+        let documents = [];
+        let videos = [];
+        let selectedAnimeId = null;
+
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('anime-collection');
+            if (saved) {
+                const data = JSON.parse(saved);
+                animes = data.animes || [];
+                documents = data.documents || [];
+                videos = data.videos || [];
+                if (animes.length > 0) {
+                    selectedAnimeId = animes[0].id;
+                }
+            }
+            render();
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('anime-collection', JSON.stringify({
+                animes,
+                documents,
+                videos
+            }));
+        }
+
+        // Add anime
+        function addAnime() {
+            const input = document.getElementById('animeInput');
+            const name = input.value.trim();
+            
+            if (name) {
+                const anime = {
+                    id: Date.now(),
+                    name: name,
+                    dateAdded: new Date().toLocaleDateString('ar-IQ')
+                };
+                animes.push(anime);
+                selectedAnimeId = anime.id;
+                input.value = '';
+                saveData();
+                render();
+            }
+        }
+
+        // Delete anime
+        function deleteAnime(id) {
+            animes = animes.filter(a => a.id !== id);
+            documents = documents.filter(d => d.animeId !== id);
+            videos = videos.filter(v => v.animeId !== id);
+            if (selectedAnimeId === id) {
+                selectedAnimeId = animes.length > 0 ? animes[0].id : null;
+            }
+            saveData();
+            render();
+        }
+
+        // Handle document upload
+        function handleDocumentUpload(e) {
+            if (!selectedAnimeId) {
+                alert('اختر أنمي أولاً!');
+                return;
+            }
+            
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const doc = {
+                        id: Date.now() + Math.random(),
+                        animeId: selectedAnimeId,
+                        name: file.name,
+                        size: (file.size / 1024).toFixed(2) + ' KB',
+                        dateAdded: new Date().toLocaleDateString('ar-IQ')
+                    };
+                    documents.push(doc);
+                    saveData();
+                    render();
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        }
+
+        // Handle video upload
+        function handleVideoUpload(e) {
+            if (!selectedAnimeId) {
+                alert('اختر أنمي أولاً!');
+                return;
+            }
+            
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const video = {
+                        id: Date.now() + Math.random(),
+                        animeId: selectedAnimeId,
+                        name: file.name,
+                        size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+                        dateAdded: new Date().toLocaleDateString('ar-IQ')
+                    };
+                    videos.push(video);
+                    saveData();
+                    render();
+                };
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        }
+
+        // Delete document
+        function deleteDocument(id) {
+            documents = documents.filter(d => d.id !== id);
+            saveData();
+            render();
+        }
+
+        // Delete video
+        function deleteVideo(id) {
+            videos = videos.filter(v => v.id !== id);
+            saveData();
+            render();
+        }
+
+        // Render UI
+        function render() {
+            // Update anime list
+            const animeList = document.getElementById('animeList');
+            animeList.innerHTML = animes.map(anime => `
+                <div class="anime-item ${selectedAnimeId === anime.id ? 'active' : ''}" onclick="selectAnime(${anime.id})">
+                    <span>${anime.name}</span>
+                    <button class="delete-btn" onclick="deleteAnime(${anime.id}); event.stopPropagation();">🗑️</button>
+                </div>
+            `).join('');
+            
+            document.getElementById('animeCount').textContent = animes.length;
+
+            // Update main content
+            const mainContent = document.getElementById('mainContent');
+            const selectedAnime = animes.find(a => a.id === selectedAnimeId);
+            
+            if (!selectedAnime) {
+                mainContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>اختر أنمي من الجهة اليسرى أو أضف أنمي جديد</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const selectedDocs = documents.filter(d => d.animeId === selectedAnimeId);
+            const selectedVids = videos.filter(v => v.animeId === selectedAnimeId);
+
+            mainContent.innerHTML = `
+                <div>
+                    <h2>${selectedAnime.name}</h2>
+                    
+                    <div class="section">
+                        <h3>📄 المستندات</h3>
+                        <div class="upload-area" onclick="document.getElementById('docInput').click()">
+                            <div class="upload-icon">📁</div>
+                            <p>اسحب المستندات هنا أو اضغط للرفع</p>
+                            <input type="file" id="docInput" multiple accept=".pdf,.doc,.docx,.txt,.xlsx" onchange="handleDocumentUpload(event)">
+                        </div>
+                        <div class="files-list">
+                            ${selectedDocs.map(doc => `
+                                <div class="file-item">
+                                    <div class="file-info">
+                                        <span>📄</span>
+                                        <div class="file-details">
+                                            <p class="file-name">${doc.name}</p>
+                                            <p class="file-meta">${doc.size} • ${doc.dateAdded}</p>
+                                        </div>
+                                    </div>
+                                    <button class="delete-btn" onclick="deleteDocument(${doc.id})">🗑️</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>🎬 الفيديوهات</h3>
+                        <div class="upload-area" onclick="document.getElementById('vidInput').click()">
+                            <div class="upload-icon">🎥</div>
+                            <p>اسحب الفيديوهات هنا أو اضغط للرفع</p>
+                            <input type="file" id="vidInput" multiple accept="video/*" onchange="handleVideoUpload(event)">
+                        </div>
+                        <div class="files-list">
+                            ${selectedVids.map(vid => `
+                                <div class="file-item">
+                                    <div class="file-info">
+                                        <span>🎬</span>
+                                        <div class="file-details">
+                                            <p class="file-name">${vid.name}</p>
+                                            <p class="file-meta">${vid.size} • ${vid.dateAdded}</p>
+                                        </div>
+                                    </div>
+                                    <button class="delete-btn" onclick="deleteVideo(${vid.id})">🗑️</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Select anime
+        function selectAnime(id) {
+            selectedAnimeId = id;
+            render();
+        }
+
+        // Handle enter key
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('animeInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addAnime();
+            });
+            loadData();
+        });
+    </script>
+</body>
+</html>
